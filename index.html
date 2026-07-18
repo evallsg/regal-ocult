@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EL REGAL OCULT</title>
+    <link rel="stylesheet" type="text/css" href = "style.css">
+</head>
+<body>
+
+<div class="game-wrapper">
+    <div class="header-bar">
+        <div style="font-weight: bold;">Els 30 de la Mireia</div>
+        <h1 class="title">[EL REGAL OCULT]</h1>
+        <button class="btn-help" onclick="openTutorialModal()">?</button>
+
+        
+    </div>
+    <div class="header-bar">
+        <div style="font-weight: bold;">19/07/26</div>
+        <div class="stats">
+            <span>✅ <span id="solved-count">0</span> / <span id="total-count">0</span></span>
+            <span>🔍 <span id="hints-count">100</span></span> <!-- Sistema de punts -->
+            💡 <span id="revealed-count"> 0</span> ❌<span id="errors-count"> 0</span>
+        </div>
+    </div>
+    <div class="main-card">
+        <div class="game-text" id="text-container"></div>
+        <div class="footer-credits">Claudàtor creat per les teves amigues</div>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="guess-input" class="input-box" placeholder="ESCRIU UNA RESPOSTA..." autocomplete="off" >
+        <button class="btn-send" id="btn-submit" onclick="checkAnswer()">Enviar</button>
+    </div>
+</div>
+<div class="modal-overlay" id="modal-tutorial">
+    <div class="modal-box" style="max-width: 600px;">
+        <div class="modal-header">
+            <h3 class="modal-title">[COM JUGAR-HI]</h3>
+            <button class="modal-close" onclick="closeTutorialModal()">&times;</button>
+        </div>
+        
+        <div class="tutorial-container">
+            <div class="modal-body" style="margin-bottom: 10px;">
+                Claudàtors és un estil de <strong>mots encreuats</strong>, resol les <strong>pistes blaves</strong> i desbloqueja la resta de pistes fins que puguis revelar l'<strong>enigma</strong>.
+            </div>
+
+            <!-- Pas 1 -->
+            <div class="tutorial-step">
+                <span class="step-icon" style="color: #007bff;">🔵</span>
+                <div>Resol primer les claus <span class="tutorial-bracket-badge">blaves</span></div>
+            </div>
+
+            <div class="tutorial-arrow">↓</div>
+
+            <!-- Pas 2 -->
+            <div class="tutorial-step">
+                <span class="step-icon">💡</span>
+                <div><strong>Clica</strong> les claus <span class="tutorial-bracket-badge">blaves</span> només si necessites una <strong>pista</strong></div>
+            </div>
+
+            <div class="tutorial-arrow">↓</div>
+
+            <!-- Pas 3 -->
+            <div class="tutorial-step">
+                <span class="step-icon">✨</span>
+                <div>Revela l'enigma per poder endevinar el teu regal!</div>
+            </div>
+
+            <!-- Secció Puntuació -->
+            <div class="section-title">Puntuació</div>
+            <div class="modal-body">
+                Comences amb 100 punts i va disminuint segons les ajudes que utilitzis o els errors que cometis:
+                <ul>
+                    <li>Primera lletra descompta 3 punts</li>
+                    <li>Pista sencera descompta 10 punts</li>
+                    <li>Error descompta 1 punt</li>
+                </ul>
+            
+                L'objectiu és resoldre el Claudàtor amb el mínim d'ajudes per obtenir la millor puntuació.
+            </div>
+
+            <!-- Botó inferior Tancar -->
+            <div class="btn-center-wrapper">
+                <button class="btn-close-tutorial" onclick="closeTutorialModal()">TANCAR</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Estructura de la Finestra Emergent (Popup Modal) -->
+<div class="modal-overlay" id="modal-hint">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3 class="modal-title">[PISTA]</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modal-content">
+            <!-- Contingut canviant mitjançant JS -->
+        </div>
+        <div class="modal-actions">
+            <button class="btn-modal" onclick="closeModal()">No</button>
+            <button class="btn-modal confirm" id="btn-modal-confirm">Sí, revelar</button>
+        </div>
+    </div>
+</div>
+<script src="script.js"></script>
+
+</body>
+</html>
