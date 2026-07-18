@@ -1,6 +1,6 @@
  // Definim l'arbre de nodes del text.
     // Un node pot ser un simple text (string) o un objecte claudàtor (amb id, answer, i contingut niat)
-    const puzzleTree = [
+    let puzzleTree = [
         "Hi ha regals que s'",
         {
             id: "p1", answer: "emboliquen", hintState: "none",
@@ -77,7 +77,7 @@
 
     let selectedId = null;
     let totalBrackets = 0;
-    let solvedBrackets = new Set();
+    let solvedBrackets = [];
     let currentScore = 100;
     let errorsCount = 0;
     let hintsCount = 0;
@@ -111,7 +111,7 @@
                 if (node.answer.toUpperCase() === answer.toUpperCase()) {
                     for(let i = 0; i < node.content.length; i++) {
                         const n = node.content[i];
-                        if ( typeof n === 'object' && !solvedBrackets.has(n.id) ) {
+                        if ( typeof n === 'object' && solvedBrackets.indexOf(n.id) <0 ) {
                             return;
                         }
                     }
@@ -133,16 +133,16 @@
             if (typeof node === 'string') {
                 html += node;
             } else if (typeof node === 'object') {
-                if (solvedBrackets.has(node.id)) {
+                if (solvedBrackets.indexOf(node.id) > -1) {
                     html += node.answer;
                 } else {
                     const isSelected = selectedId === node.id ? ' selected' : '';
                     // Si té la primera lletra revelada, la mostrem al costat del claudàtor
-                    const letterHint = node.hintState !== 'none' ? `<b style="color:#c92a2a; margin-right:2px;">(${node.answer[0]}...)</b>` : '';
+                    const letterHint = node.hintState !== 'none' ? `<b style="margin-right:2px;">(${node.answer[0].toUpperCase()}...)</b>` : '';
                     let childrenSolved = true;
                     for(let i = 0; i < node.content.length; i++) {
                         const n = node.content[i];
-                        if ( typeof n === 'object' && !solvedBrackets.has(n.id) ) {
+                        if ( typeof n === 'object' && solvedBrackets.indexOf(n.id) < 0) {
                             childrenSolved = false;
                             break;
                         }
@@ -160,7 +160,7 @@
     function updateDisplay() {
         const container = document.getElementById('text-container');
         container.innerHTML = renderTree(puzzleTree);
-        document.getElementById('solved-count').innerText = solvedBrackets.size;
+        document.getElementById('solved-count').innerText = solvedBrackets.length;
         document.getElementById('hints-count').innerText = hintsCount;
         document.getElementById('errors-count').innerText = errorsCount;
         document.getElementById('revealed-count').innerText = revealedCount;
@@ -253,7 +253,7 @@
         const bracket = findBracketById(puzzleTree, id);
         if (bracket) {
             bracket.hintState = 'full';
-            solvedBrackets.add(id);
+            solvedBrackets.push(id);
             currentScore -= 10;
             selectedId = null;
             revealedCount++;
@@ -286,7 +286,7 @@
         const activeBracket = findBracketByAnswer(puzzleTree, userGuess); //findBracketById(puzzleTree, selectedId);
         
         if (activeBracket){// && userGuess.toUpperCase() === activeBracket.answer.toUpperCase()) {
-            solvedBrackets.add(activeBracket.id);
+            solvedBrackets.push(activeBracket.id);
             selectedId = null;
             // currentScore += 10; // Encertar dona punts
             
@@ -294,7 +294,7 @@
             // input.disabled = true;
             input.placeholder = "ESCRIU UNA RESPOSTA...";
             
-            if (solvedBrackets.size === totalBrackets) {
+            if (solvedBrackets.length === totalBrackets) {
                 alert("🎉 Enhorabona! Has completat l'enigma dels claudàtors!");
 
             }
@@ -310,11 +310,51 @@
 
     }
 
-    // Inicialització global
-    countTotalBrackets(puzzleTree);
-    document.getElementById('total-count').innerText = totalBrackets;
-    updateDisplay();
 
     document.getElementById('guess-input').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') checkAnswer();
     });
+
+    function init( ) {
+        window.onbeforeunload = e => {
+            localStorage.setItem("errorsCount", errorsCount)
+            localStorage.setItem("currentScore", currentScore)
+            localStorage.setItem("hintsCount", hintsCount)
+            localStorage.setItem("solvedBrackets", JSON.stringify({solvedBrackets}))
+            localStorage.setItem("puzzleTree", JSON.stringify({puzzleTree}));
+
+         }
+           // Inicialització global
+        errorsCount = localStorage.getItem("errorsCount") || 0;
+        errorsCount = Number(errorsCount);
+        currentScore = localStorage.getItem("currentScore") || 100;
+        currentScore = Number(currentScore);
+        hintsCount = localStorage.getItem("hintsCount") || 0;
+        hintsCount = Number(hintsCount);
+        solvedBrackets = localStorage.getItem("solvedBrackets");
+        if( solvedBrackets ) {
+            try {
+                solvedBrackets = JSON.parse(solvedBrackets).solvedBrackets;
+            }
+            catch(err) {
+                solvedBrackets = [];
+            }
+        }
+        solvedBrackets = solvedBrackets || [];
+
+        let pt = localStorage.getItem("puzzleTree");
+        if( pt ) {
+            try {
+                puzzleTree = JSON.parse(pt).puzzleTree;
+            }
+            catch(err) {
+            }
+        }
+
+        countTotalBrackets(puzzleTree);
+        document.getElementById('total-count').innerText = totalBrackets;
+        updateDisplay();
+    }
+
+    init()
+   
