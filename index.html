@@ -4,34 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EL REGAL OCULT</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" type="text/css" href = "style.css">
 </head>
 <body>
+<div class="game-container">
+    <div class="game-wrapper">
+        <div class="header-bar">
+            <div style="font-weight: bold;">Els 30 de la Mireia</div>
+            <h1 class="title">[EL REGAL OCULT]</h1>
+            <button class="btn-help" onclick="openTutorialModal()">?</button>
 
-<div class="game-wrapper">
-    <div class="header-bar">
-        <div style="font-weight: bold;">Els 30 de la Mireia</div>
-        <h1 class="title">[EL REGAL OCULT]</h1>
-        <button class="btn-help" onclick="openTutorialModal()">?</button>
-
-        
-    </div>
-    <div class="header-bar">
-        <div style="font-weight: bold;">19/07/26</div>
-        <div class="stats">
-            <span>✅ <span id="solved-count">0</span> / <span id="total-count">0</span></span>
-            <span>🔍 <span id="hints-count">100</span></span> <!-- Sistema de punts -->
-            💡 <span id="revealed-count"> 0</span> ❌<span id="errors-count"> 0</span>
+            
         </div>
-    </div>
-    <div class="main-card">
-        <div class="game-text" id="text-container"></div>
-        <div class="footer-credits">Claudàtor creat per les teves amigues</div>
-    </div>
+        <div class="header-bar row">
+            <div style="font-weight: bold;">19/07/26</div>
+            <div class="stats">
+                <span>✅ <span id="solved-count">0</span> / <span id="total-count">0</span></span>
+                <span>🔍 <span id="hints-count">100</span></span> <!-- Sistema de punts -->
+                💡 <span id="revealed-count"> 0</span> ❌<span id="errors-count"> 0</span>
+            </div>
+        </div>
+        <div class="main-card">
+            <div class="game-text" id="text-container"></div>
+            <div class="footer-credits">Claudàtor creat per les teves amigues</div>
+        </div>
 
-    <div class="input-area">
-        <input type="text" id="guess-input" class="input-box" placeholder="ESCRIU UNA RESPOSTA..." autocomplete="off" >
-        <button class="btn-send" id="btn-submit" onclick="checkAnswer()">Enviar</button>
+        <div class="input-area">
+            <input type="text" id="guess-input" class="input-box" placeholder="ESCRIU UNA RESPOSTA..." autocomplete="off" >
+            <button class="btn-send" id="btn-submit" onclick="checkAnswer()">Enviar</button>
+        </div>
     </div>
 </div>
 <div class="modal-overlay" id="modal-tutorial">
@@ -72,7 +74,7 @@
             <div class="section-title">Puntuació</div>
             <div class="modal-body">
                 Comences amb 100 punts i va disminuint segons les ajudes que utilitzis o els errors que cometis:
-                <ul>
+                <ul class="tutorial-points">
                     <li>Primera lletra descompta 3 punts</li>
                     <li>Pista sencera descompta 10 punts</li>
                     <li>Error descompta 1 punt</li>

@@ -241,7 +241,7 @@
         const bracket = findBracketById(puzzleTree, id);
         if (bracket) {
             bracket.hintState = 'letter';
-            currentScore -= 5;
+            currentScore -= 3;
             hintsCount++;
             updateDisplay();
         }
@@ -254,7 +254,7 @@
         if (bracket) {
             bracket.hintState = 'full';
             solvedBrackets.add(id);
-            currentScore -= 20;
+            currentScore -= 10;
             selectedId = null;
             revealedCount++;
             // Reajustar input inferior
@@ -288,7 +288,7 @@
         if (activeBracket){// && userGuess.toUpperCase() === activeBracket.answer.toUpperCase()) {
             solvedBrackets.add(activeBracket.id);
             selectedId = null;
-            currentScore += 10; // Encertar dona punts
+            // currentScore += 10; // Encertar dona punts
             
             input.value = "";
             // input.disabled = true;
@@ -300,6 +300,7 @@
             }
         } else {
             errorsCount++;
+            currentScore--;
             input.style.backgroundColor = '#f8d7da';
             setTimeout(() => { input.style.backgroundColor = 'white'; }, 250);
             input.value = "";
