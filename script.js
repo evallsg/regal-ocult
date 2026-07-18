@@ -165,10 +165,13 @@
         document.getElementById('errors-count').innerText = errorsCount;
         document.getElementById('revealed-count').innerText = revealedCount;
 
-        if( solvedBrackets.size === totalBrackets ) {
+        if( solvedBrackets.length === totalBrackets ) {
 
-            const main = document.getElementsByClass('main-card');
+            const main = document.getElementsByClassName('main-card');
             main[0].classList.add("success");
+            openScoreModal();
+            const input = document.getElementById('guess-input');
+            input.disabled = true;
         }
 
     }
@@ -236,6 +239,28 @@
         document.getElementById('modal-tutorial').classList.remove('active');
     }
 
+    function openScoreModal() {
+        // Assignem la puntuació final aconseguida a la modal
+        document.getElementById('final-score').innerText = currentScore;
+        
+        // Calcular el rang de text de la puntuació de forma dinàmica
+        const ratingEl = document.getElementById('score-rating');
+        if (currentScore >= 90) {
+            ratingEl.innerText = "EXCEL·LENT";
+        } else if (currentScore >= 70) {
+            ratingEl.innerText = "MOLT BÉ";
+        } else if (currentScore >= 50) {
+            ratingEl.innerText = "NOTABLE";
+        } else {
+            ratingEl.innerText = "SUPERAT";
+        }
+
+        document.getElementById('modal-score').classList.add('active');
+    }
+
+    function closeScoreModal() {
+        document.getElementById('modal-score').classList.remove('active');
+    }
     // Acció: Revelar només la primera lletra
     function revealFirstLetter(id) {
         const bracket = findBracketById(puzzleTree, id);
@@ -283,6 +308,9 @@
 
         const input = document.getElementById('guess-input');
         const userGuess = input.value.trim().toUpperCase();
+        if(!userGuess) {
+            return;
+        }
         const activeBracket = findBracketByAnswer(puzzleTree, userGuess); //findBracketById(puzzleTree, selectedId);
         
         if (activeBracket){// && userGuess.toUpperCase() === activeBracket.answer.toUpperCase()) {
@@ -295,7 +323,7 @@
             input.placeholder = "ESCRIU UNA RESPOSTA...";
             
             if (solvedBrackets.length === totalBrackets) {
-                alert("🎉 Enhorabona! Has completat l'enigma dels claudàtors!");
+                setTimeout(openScoreModal, 600);
 
             }
         } else {
@@ -315,22 +343,39 @@
         if (e.key === 'Enter') checkAnswer();
     });
 
-    function init( ) {
+    const originalPT = [...puzzleTree];
+
+    function init( clear = false ) {
         window.onbeforeunload = e => {
             localStorage.setItem("errorsCount", errorsCount)
             localStorage.setItem("currentScore", currentScore)
             localStorage.setItem("hintsCount", hintsCount)
+            localStorage.setItem("revealedCount", revealedCount)
             localStorage.setItem("solvedBrackets", JSON.stringify({solvedBrackets}))
             localStorage.setItem("puzzleTree", JSON.stringify({puzzleTree}));
 
          }
-           // Inicialització global
+
+        // Inicialització global
+        if( clear ) {
+            localStorage.clear();
+            puzzleTree = originalPT;
+            totalBrackets = 0;
+            selectedId = null;  
+            const main = document.getElementsByClassName('main-card');
+            main[0].classList.remove("success");
+            closeScoreModal();
+            const input = document.getElementById('guess-input');
+            input.disabled = false;
+        } 
         errorsCount = localStorage.getItem("errorsCount") || 0;
         errorsCount = Number(errorsCount);
         currentScore = localStorage.getItem("currentScore") || 100;
         currentScore = Number(currentScore);
         hintsCount = localStorage.getItem("hintsCount") || 0;
         hintsCount = Number(hintsCount);
+        revealedCount = localStorage.getItem("revealedCount") || 0;
+        revealedCount = Number(revealedCount);
         solvedBrackets = localStorage.getItem("solvedBrackets");
         if( solvedBrackets ) {
             try {

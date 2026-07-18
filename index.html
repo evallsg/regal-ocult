@@ -27,7 +27,7 @@
         </div>
         <div class="main-card">
             <div class="game-text" id="text-container"></div>
-            <div class="footer-credits">Claudàtor creat per les teves amigues</div>
+            <div class="footer-credits">Enigma creat per les teves amigues</div>
         </div>
 
         <div class="input-area">
@@ -45,7 +45,7 @@
         
         <div class="tutorial-container">
             <div class="modal-body" style="margin-bottom: 10px;">
-                Claudàtors és un estil de <strong>mots encreuats</strong>, resol les <strong>pistes blaves</strong> i desbloqueja la resta de pistes fins que puguis revelar l'<strong>enigma</strong>.
+                El Regal Ocult és un estil de <strong>mots encreuats</strong>, basat en el Claudàtors. Resol les <strong>pistes blaves</strong> i desbloqueja la resta de pistes fins que puguis revelar l'<strong>enigma</strong>.
             </div>
 
             <!-- Pas 1 -->
@@ -75,12 +75,12 @@
             <div class="modal-body">
                 Comences amb 100 punts i va disminuint segons les ajudes que utilitzis o els errors que cometis:
                 <ul class="tutorial-points">
-                    <li>Primera lletra descompta 3 punts</li>
-                    <li>Pista sencera descompta 10 punts</li>
-                    <li>Error descompta 1 punt</li>
+                    <li><strong>Primera lletra</strong> descompta 3 punts</li>
+                    <li><strong>Pista sencera</strong> descompta 10 punts</li>
+                    <li><strong>Error</strong> descompta 1 punt</li>
                 </ul>
             
-                L'objectiu és resoldre el Claudàtor amb el mínim d'ajudes per obtenir la millor puntuació.
+                L'objectiu és resoldre l'enigma amb el mínim d'ajudes per obtenir la millor puntuació i poder endevinar <strong>el teu regal ocult</strong>.
             </div>
 
             <!-- Botó inferior Tancar -->
@@ -103,6 +103,49 @@
         <div class="modal-actions">
             <button class="btn-modal" onclick="closeModal()">No</button>
             <button class="btn-modal confirm" id="btn-modal-confirm">Sí, revelar</button>
+        </div>
+    </div>
+</div>
+<!-- ============================================== -->
+<!-- MODAL DE FINAL DE JOC: [PUNTUACIÓ]             -->
+<!-- ============================================== -->
+<div class="modal-overlay" id="modal-score">
+    <div class="modal-box" style="max-width: 550px; text-align: center;">
+        <div class="modal-header">
+            <h3 class="modal-title" style="text-align: left;">[PUNTUACIÓ]</h3>
+            <button class="modal-close" onclick="closeScoreModal()">&times;</button>
+        </div>
+        
+        <div class="score-body">
+            <!-- Icona gran central -->
+            <div class="score-emoji">🥳</div>
+            
+            <!-- Puntuació gran -->
+            <div class="score-number"><span id="final-score">100</span> / 100</div>
+            
+            <!-- Rang de valoració (Excel·lent, etc.) -->
+            <div class="score-rating" id="score-rating">EXCEL·LENT</div>
+            
+            <!-- Separador fi tal com es veu a la imatge -->
+            <div class="score-divider"></div>
+            
+            <!-- La cita literària resolta (aquí pots posar el missatge final o pista del regal) -->
+            <div class="resolved-quote">
+                <p class="quote-text">“Hi ha regals que s'emboliquen. D'altres es forgen. El teu encara no té forma, però aviat el convertiràs en un record que podràs portar sempre amb tu. I no ho faràs sola.”</p>
+                <p class="quote-author">- SAGERAO</p>
+            </div>
+            
+            <!-- Text personalitzat d'aniversari -->
+            <div class="next-claudator">
+                🎈 Feliços 30 anys! Has descobert l'enigma. Ara toca resoldre'l!!!
+            </div>
+            
+            <!-- Botons inferiors d'acció de l'estil original -->
+            <div class="score-actions">
+                <button class="btn-score-action" onclick="init(true)">
+                    🕹️ REINICIAR EL JOC
+                </button>
+            </div>
         </div>
     </div>
 </div>

@@ -379,6 +379,104 @@ body {
     border: none;
 }
 
+/* --- Estils de la Modal de Puntuació Final --- */
+.score-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+}
+
+.score-emoji {
+    font-size: 4.5rem;
+    margin-bottom: 10px;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.score-number {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #212529;
+    margin: 0;
+    line-height: 1;
+}
+
+.score-rating {
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-top: 15px;
+    text-transform: uppercase;
+    color: #000;
+}
+
+.score-divider {
+    width: 100%;
+    height: 1px;
+    background-color: #f1f3f5;
+    margin: 25px 0;
+}
+
+.resolved-quote {
+    font-family: Georgia, serif;
+    color: #495057;
+    margin-bottom: 25px;
+}
+
+.quote-text {
+    font-style: italic;
+    font-size: 1.15rem;
+    margin: 0 0 8px 0;
+}
+
+.quote-author {
+    font-size: 0.9rem;
+    color: #868e96;
+    margin: 0;
+}
+
+.next-claudator {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 30px;
+}
+
+/* Gird de 3 botons idèntics a la imatge */
+.score-actions {
+    display: grid;
+    gap: 10px;
+    width: 100%;
+}
+
+.btn-score-action {
+    background: white;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 12px 5px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #000;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-score-action:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+}
+
+
 .footer-credits {
     text-align: center;
     font-size: 0.85rem;
@@ -391,6 +489,10 @@ body {
         background-size: 30px 30px; /* Requadres de fons una mica més compactes */
     }
 
+    .game-container {
+        /* width: 100%; */
+        width: auto;
+    }
     .game-wrapper {
         gap: 5px;
     }
@@ -497,5 +599,17 @@ body {
         right: 5px;
         top: 5px;
         font-family: var(--font-secondary);
+    }
+    .score-actions {
+        grid-template-columns: 1fr; /* Es posen un sota l'altre si la pantalla és petita */
+        gap: 8px;
+    }
+    .btn-score-action {
+        flex-direction: row; /* En mòbil es llegeix millor de costat */
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+    .score-number {
+        font-size: 2.8rem;
     }
 }       
