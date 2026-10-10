@@ -72,12 +72,11 @@
   <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-30">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="bg-gradient-to-tr from-emerald-500 to-blue-600 text-white font-black px-2.5 py-1.5 rounded-lg text-lg tracking-wider shadow-lg">
-          CBS
+        <div class="bg-gradient-to-tr from-emerald-500 to-blue-600 text-white font-black px-2.5 py-1.5 rounded-lg tracking-wider shadow-lg">
+          PPR
         </div>
         <div>
-          <h1 class="font-black text-lg sm:text-xl text-white tracking-tight leading-none">Clues by Sam</h1>
-          <p class="text-xs text-slate-400 mt-0.5">Edició Catalunya • Pistes Deductives (4x5 Grid)</p>
+          <h1 class="font-black text-lg sm:text-xl text-white tracking-tight leading-none">Pistes pel regal</h1>
         </div>
       </div>
       <div class="flex items-center space-x-2">
@@ -289,7 +288,7 @@
         source: "Safi (D1)"
       },
       A5: {
-        text: "«M'heu atrat, soc criminal (jijiji)!»",
+        text: "«M'heu atrapat, soc criminal de fer-vos caure la baba!»",
         source: "Nora (A5)"
       },
       A4: {
@@ -475,7 +474,7 @@
         const card = document.createElement('div');
         card.dataset.id = suspect.id;
 
-        let baseClass = "card-shadow rounded-xl p-2 sm:p-2.5 border transition-all duration-300 flex flex-col justify-between select-none relative overflow-hidden min-h-[145px] sm:min-h-[160px]";
+        let baseClass = "card-shadow rounded-xl p-2 sm:p-2.5 border transition-all duration-300 flex flex-col justify-between select-none relative overflow-hidden min-h-[110px] sm:min-h-[160px]";
 
         if (isRevealed) {
           baseClass += " card-reveal";
@@ -499,7 +498,6 @@
               ${isRevealed ? `
                 <span class="text-[9px] sm:text-[10px] font-extrabold px-1.5 py-0.5 rounded-full flex items-center gap-1 ${revealedStatus === 'innocent' ? 'bg-emerald-500 text-slate-950' : 'bg-rose-500 text-white'}">
                   <i class="fas ${revealedStatus === 'innocent' ? 'fa-shield-halved' : 'fa-skull'} text-[8px]"></i>
-                  <span>${revealedStatus === 'innocent' ? 'INNOCENT' : 'CRIMINAL'}</span>
                 </span>
               ` : ''}
             </div>
@@ -507,10 +505,6 @@
             <h3 class="font-black text-xs sm:text-sm leading-tight ${isRevealed ? 'text-white' : 'text-slate-100'}">
               ${suspect.name}
             </h3>
-            <p class="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
-              <i class="fas fa-location-dot text-[8px] text-slate-500"></i>
-              <span>${suspect.city}</span>
-            </p>
           </div>
 
           ${isRevealed && cardClueData ? `
