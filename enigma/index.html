@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ca" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clues by Sam - Edició Catalunya</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            board: '#0b0f19',
+            cardBg: '#1e293b',
+            cardBorder: '#334155',
+            innocent: '#10b981',
+            criminal: '#f43f5e'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0b0f19;
+      color: #f8fafc;
+    }
+    .grid-board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    @media (max-width: 640px) {
+      .grid-board {
+        gap: 0.4rem;
+      }
+    }
+    .shake-anim {
+      animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+    .card-reveal {
+      animation: flipIn 0.35s ease-out forwards;
+    }
+    @keyframes flipIn {
+      0% { opacity: 0; transform: scale(0.92) translateY(4px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+  <!-- Header Banner -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="bg-gradient-to-tr from-emerald-500 to-blue-600 text-white font-black px-2.5 py-1.5 rounded-lg text-lg tracking-wider shadow-lg">
+          CBS
+        </div>
+        <div>
+          <h1 class="font-black text-lg sm:text-xl text-white tracking-tight leading-none">Clues by Sam</h1>
+          <p class="text-xs text-slate-400 mt-0.5">Edició Catalunya • Pistes Deductives (4x5 Grid)</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button id="btn-rules" class="px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+          <i class="fas fa-book-open text-blue-400"></i>
+          <span class="hidden sm:inline">Regles i Glossari</span>
+        </button>
+        <button id="btn-reset" class="px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+          <i class="fas fa-rotate-right text-amber-400"></i>
+          <span>Reiniciar</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-5 w-full flex-grow grid grid-cols-1 lg:grid-cols-12 gap-6">
+    
+    <!-- Left Section: Board Grid -->
+    <section class="lg:col-span-8 flex flex-col gap-3">
+      
+      <!-- Stats Header -->
+      <div class="flex items-center justify-between text-xs font-semibold text-slate-400 px-1 bg-slate-900/80 p-3 rounded-xl border border-slate-800 shadow-md">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-user-check text-emerald-400"></i>
+          <span>Descoberts:</span>
+          <span id="stat-revealed" class="font-black text-white text-sm">1</span>
+          <span>/ 20</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i class="fas fa-clock text-blue-400"></i>
+          <span>Temps:</span>
+          <span id="stat-timer" class="font-black text-white text-sm">00:00</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i class="fas fa-triangle-exclamation text-rose-400"></i>
+          <span>Errors:</span>
+          <span id="stat-errors" class="font-black text-rose-400 text-sm">0</span>
+        </div>
+      </div>
+
+      <!-- Column Labels (A, B, C, D) -->
+      <div class="grid grid-cols-4 gap-2 text-center font-black text-xs text-slate-500 uppercase tracking-widest px-1">
+        <div>COL A</div>
+        <div>COL B</div>
+        <div>COL C</div>
+        <div>COL D</div>
+      </div>
+
+      <!-- Main Grid Board -->
+      <div id="board" class="grid-board">
+        <!-- Cards generated dynamically -->
+      </div>
+    </section>
+
+    <!-- Right Section: Clues Log Panel -->
+    <section class="lg:col-span-4 flex flex-col gap-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col h-full shadow-xl">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <h2 class="font-bold text-sm sm:text-base text-white flex items-center gap-2">
+            <i class="fas fa-scroll text-blue-400"></i>
+            <span>Registre de Pistes Desbloquejades</span>
+          </h2>
+          <span id="clue-count-badge" class="px-2.5 py-0.5 text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full">
+            1 Pista
+          </span>
+        </div>
+
+        <div id="clues-container" class="mt-4 flex flex-col gap-2.5 overflow-y-auto max-h-[520px] pr-1">
+          <!-- Clues dynamically injected here -->
+        </div>
+
+        <div class="mt-auto pt-4 border-t border-slate-800 text-xs text-slate-400 flex items-start gap-2 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+          <i class="fas fa-circle-info text-amber-400 mt-0.5 flex-shrink-0"></i>
+          <span>Selecciona directament 😇 o 😈 a la targeta del personatge que puguis deduir!</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODALS -->
+  <!-- Modal: No Guessing -->
+  <div id="modal-noguess" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border-2 border-amber-500/60 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+      <div class="w-14 h-14 bg-amber-500/20 text-amber-400 rounded-2xl flex items-center justify-center text-2xl mb-4 mx-auto border border-amber-500/40">
+        <i class="fas fa-brain"></i>
+      </div>
+      <h3 class="text-xl font-black text-white text-center mb-2">NO POTS ENDEVINAR!</h3>
+      <p id="noguess-text" class="text-xs sm:text-sm text-slate-300 text-center leading-relaxed mb-6">
+        Com al joc original de <strong>Clues by Sam</strong>, no pots arriscar-te ni condemnar ningú per atzar. Hi ha una deducció lògica 100% segura que pots fer amb les pistes que ja tens desglossades!
+      </p>
+      <button id="btn-close-noguess" class="w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-sm rounded-xl transition shadow-lg">
+        ENTÈS, REVISARÉ LES PISTES
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal: Wrong Role Choice -->
+  <div id="modal-wrongrole" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border-2 border-rose-500/60 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+      <div class="w-14 h-14 bg-rose-500/20 text-rose-400 rounded-2xl flex items-center justify-center text-2xl mb-4 mx-auto border border-rose-500/40">
+        <i class="fas fa-triangle-exclamation"></i>
+      </div>
+      <h3 class="text-xl font-black text-white text-center mb-2">OPCIÓ INCORRECTA!</h3>
+      <p id="wrongrole-text" class="text-xs sm:text-sm text-slate-300 text-center leading-relaxed mb-6">
+        Has indicat un estat erroni per a aquest personatge.
+      </p>
+      <button id="btn-close-wrongrole" class="w-full py-3 bg-rose-500 hover:bg-rose-600 text-white font-extrabold text-sm rounded-xl transition shadow-lg">
+        TORNAR A INTENTAR
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal: Rules & Glossary -->
+  <div id="modal-rules" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fas fa-book-bookmark text-blue-400"></i>
+          <span>Regles Oficials i Glossari</span>
+        </h3>
+        <button id="btn-close-rules" class="text-slate-400 hover:text-white text-lg px-2">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+      <div class="overflow-y-auto my-4 pr-2 text-xs sm:text-sm text-slate-300 space-y-3 leading-relaxed">
+        <p><strong class="text-white">• Cantonades:</strong> Les 4 cantonades del tauler són A1 (Mireia P), D1 (Safi), A5 (Nora) i D5 (Eva).</p>
+        <p><strong class="text-white">• Veïns:</strong> Els 8 personatges del voltant d'una casella (ortogonals i diagonals).</p>
+        <p><strong class="text-white">• Deducció lògica:</strong> Cada pas es desbloqueja de forma 100% determinista. Mai no cal endevinar a la xamba.</p>
+      </div>
+      <div class="pt-3 border-t border-slate-800 text-right">
+        <button id="btn-close-rules-2" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg text-xs">Entès</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Victory -->
+  <div id="modal-victory" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border-2 border-emerald-500 rounded-2xl max-w-md w-full p-6 shadow-2xl text-center">
+      <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center text-3xl mb-4 mx-auto border border-emerald-500/40">
+        <i class="fas fa-trophy"></i>
+      </div>
+      <h3 class="text-2xl font-black text-white mb-2">CAS RESOLT!</h3>
+      <p class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-6">
+        Has identificat perfectament l'estat dels 20 personatges fent servir única i exclusivament la lògica! 
+      </p>
+      <p class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-6">
+        Això només ha sigut un entrenament pel teu regal. Prepara tots els teus sentits i l'enginy perquè tocarà resoldre casos i misteris: <b>anirem a fer de jurat d'un cas + ESCAPE ROOM!</b> Però primer el més difícil: trobar un dia que puguem fer-ho totes juntes!!!
+      </p>
+        <button id="btn-victory-restart" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black rounded-xl transition shadow-lg">
+        TORNAR A JUGAR
+      </button>
+    </div>
+  </div>
+
+  <footer class="border-t border-slate-800 py-3 text-center text-xs text-slate-500">
+    Clues by Sam • Edició Catalunya
+  </footer>
+
+  <script>
+    /*
+     * 20 SUSPECTS MATRIX (4 Columns x 5 Rows)
+     */
+    const SUSPECTS = [
+      // Fila 1
+      { id: 'A1', name: 'Mireia P', city: 'Arbúcies', row: 1, col: 'A', solution: 'criminal' },
+      { id: 'B1', name: 'Gina', city: 'Barcelona', row: 1, col: 'B', solution: 'criminal' },
+      { id: 'C1', name: 'Mireia Ll', city: 'Teià', row: 1, col: 'C', solution: 'innocent' },
+      { id: 'D1', name: 'Safi', city: 'Arenys de Mar', row: 1, col: 'D', solution: 'criminal' },
+
+      // Fila 2
+      { id: 'A2', name: 'Núria', city: 'Montcada i Reixac', row: 2, col: 'A', solution: 'innocent' },
+      { id: 'B2', name: 'Cinta', city: 'Breda', row: 2, col: 'B', solution: 'criminal' },
+      { id: 'C2', name: 'Sònia', city: 'Arbúcies', row: 2, col: 'C', solution: 'innocent' },
+      { id: 'D2', name: 'Eli', city: 'Barcelona', row: 2, col: 'D', solution: 'innocent' },
+
+      // Fila 3
+      { id: 'A3', name: 'Gemma', city: 'Granollers', row: 3, col: 'A', solution: 'innocent' },
+      { id: 'B3', name: 'David', city: 'Montcada i Reixac', row: 3, col: 'B', solution: 'criminal' },
+      { id: 'C3', name: 'Víctor', city: 'Barcelona', row: 3, col: 'C', solution: 'innocent' },
+      { id: 'D3', name: 'Gerard', city: 'Teià', row: 3, col: 'D', solution: 'criminal' },
+
+      // Fila 4
+      { id: 'A4', name: 'Pedro', city: 'Barcelona', row: 4, col: 'A', solution: 'innocent' },
+      { id: 'B4', name: 'Cristina', city: 'Barcelona', row: 4, col: 'B', solution: 'criminal' },
+      { id: 'C4', name: 'Álvaro', city: 'Arbúcies', row: 4, col: 'C', solution: 'innocent' },
+      { id: 'D4', name: 'Tobal', city: 'Arenys de Mar', row: 4, col: 'D', solution: 'innocent' },
+
+      // Fila 5
+      { id: 'A5', name: 'Nora', city: 'Arenys de Mar', row: 5, col: 'A', solution: 'criminal' },
+      { id: 'B5', name: 'Clara', city: 'Teià', row: 5, col: 'B', solution: 'innocent' },
+      { id: 'C5', name: 'Merino', city: 'Vilabrareix', row: 5, col: 'C', solution: 'innocent' },
+      { id: 'D5', name: 'Eva', city: 'Barcelona', row: 5, col: 'D', solution: 'innocent' }
+    ];
+
+    /*
+     * CLUES AND ANECDOTES FOR EACH CARD
+     */
+    const CARD_CLUES = {
+      D5: {
+        text: "«Hi ha 3 CRIMINALS a les cantonades!»",
+        source: "Eva (D5) - Pista Inicial"
+      },
+      A1: {
+        text: "«A la meva columna hi ha exactament 3 persones INNOCENTS!»",
+        source: "Mireia P (A1)"
+      },
+      D1: {
+        text: "«Arenys és tranqui, però jo soc culpable!»",
+        source: "Safi (D1)"
+      },
+      A5: {
+        text: "«M'heu atrat, soc criminal (jijiji)!»",
+        source: "Nora (A5)"
+      },
+      A4: {
+        text: "«A la Fila 1 hi ha 3 CRIMINALS!»",
+        source: "Pedro (A4)"
+      },
+      A2: {
+        text: "«La Mireia Ll és INNOCENT!»",
+        source: "Núria (A2)"
+      },
+      A3: {
+        text: "«Us confirmo que jo soc d'els bons, soc poli!»",
+        source: "Gemma (A3)"
+      },
+      B1: {
+        text: "Pista de la Gina: «L'Eli i en Tobal són INNOCENTS.»",
+        source: "Gina (B1)"
+      },
+      C1: {
+        text: "«La Sònia i en Merino són INNOCENTS!»",
+        source: "Mireia Ll (C1)"
+      },
+      D2: {
+        text: "«A la Fila 3, en David i en Gerard són CRIMINALS, però en Víctor és INNOCENT!»",
+        source: "Eli (D2)"
+      },
+      D4: {
+        text: "«Un bon passeig per la platja d'Arenys!»",
+        source: "Tobal (D4)"
+      },
+      C2: {
+        text: "«Una CRIMINAL és de Breda!»",
+        source: "Sònia (C2)"
+      },
+      C5: {
+        text: "«La Clara i l'Álvaro són INNOCENTS!»",
+        source: "Merino (C5)"
+      },
+      B3: {
+        text: "«Montcada al mapa... m'heu enxampat!»",
+        source: "David (B3)"
+      },
+      D3: {
+        text: "«M'heu atrapat a Teià!»",
+        source: "Gerard (D3)"
+      },
+      C3: {
+        text: "«La Cristina és la CRIMINAL de la Fila 4!»",
+        source: "Víctor (C3)"
+      },
+      B2: {
+        text: "«A Breda fent ceràmica... soc culpable!»",
+        source: "Cinta (B2)"
+      },
+      B5: {
+        text: "«Només soc un bebè, soc 100% innocent!»",
+        source: "Clara (B5)"
+      },
+      C4: {
+        text: "«A Arbúcies no hi ha criminals...»",
+        source: "Álvaro (C4)"
+      },
+      B4: {
+        text: "«Barcelona té de tot... i jo soc la culpable!»",
+        source: "Cristina (B4)"
+      }
+    };
+
+    /*
+     * STREAMING_CHUNK:Setting up exact logic matrix and dependencies...
+     */
+    let state = {
+      revealed: { 'D5': 'innocent' }, // D5 REVEALED BY DEFAULT
+      unlockedFacts: new Set(['FACT_D5']),
+      errors: 0,
+      activeClues: [CARD_CLUES.D5],
+      timerSeconds: 0,
+      timerInterval: null
+    };
+
+    /*
+     * EXACT DEDUCTION CHAIN:
+     * - FACT_D5 unlocks [A1, D1, A5] (all 3 corner criminals)
+     * - FACT_A1 (Mireia P revealed: A1=Criminal, A5=Criminal -> 3 innocents in Col A) unlocks [A2, A3, A4]
+     * - FACT_A4 unlocks B1 (Gina = Criminal)
+     * - FACT_A2 unlocks C1 (Mireia Ll = Innocent)
+     * - FACT_B1 unlocks D2 (Eli = Innocent) & D4 (Tobal = Innocent)
+     * - FACT_C1 unlocks C2 (Sònia = Innocent) & C5 (Merino = Innocent)
+     * - FACT_D2 unlocks B3 (David = Criminal), D3 (Gerard = Criminal), C3 (Víctor = Innocent)
+     * - FACT_C2 unlocks B2 (Cinta = Criminal)
+     * - FACT_C5 unlocks B5 (Clara = Innocent) & C4 (Álvaro = Innocent)
+     * - FACT_C3 unlocks B4 (Cristina = Criminal)
+     */
+    const DEDUCTIBLE_MAP = {
+      'FACT_D5': ['A1', 'D1', 'A5'],
+      'FACT_A1': ['A2', 'A3', 'A4'],
+      'FACT_A4': ['B1'],
+      'FACT_A2': ['C1'],
+      'FACT_B1': ['D2', 'D4'],
+      'FACT_C1': ['C2', 'C5'],
+      'FACT_D2': ['B3', 'D3', 'C3'],
+      'FACT_C2': ['B2'],
+      'FACT_C5': ['B5', 'C4'],
+      'FACT_C3': ['B4']
+    };
+
+    function canReveal(suspectId) {
+      if (state.revealed[suspectId]) return false;
+
+      for (let factId of state.unlockedFacts) {
+        if (DEDUCTIBLE_MAP[factId] && DEDUCTIBLE_MAP[factId].includes(suspectId)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function unlockFactsForSuspect(suspectId) {
+      const factKey = 'FACT_' + suspectId;
+      if (DEDUCTIBLE_MAP[factKey]) {
+        state.unlockedFacts.add(factKey);
+      }
+    }
+
+    const boardEl = document.getElementById('board');
+    const cluesContainerEl = document.getElementById('clues-container');
+    const clueCountBadgeEl = document.getElementById('clue-count-badge');
+    const statRevealedEl = document.getElementById('stat-revealed');
+    const statErrorsEl = document.getElementById('stat-errors');
+    const statTimerEl = document.getElementById('stat-timer');
+
+    const modalNoGuess = document.getElementById('modal-noguess');
+    const noGuessTextEl = document.getElementById('noguess-text');
+    const btnCloseNoGuess = document.getElementById('btn-close-noguess');
+
+    const modalWrongRole = document.getElementById('modal-wrongrole');
+    const wrongRoleTextEl = document.getElementById('wrongrole-text');
+    const btnCloseWrongRole = document.getElementById('btn-close-wrongrole');
+
+    const modalRules = document.getElementById('modal-rules');
+    const btnRules = document.getElementById('btn-rules');
+    const btnCloseRules = document.getElementById('btn-close-rules');
+    const btnCloseRules2 = document.getElementById('btn-close-rules-2');
+
+    const modalVictory = document.getElementById('modal-victory');
+    const btnVictoryRestart = document.getElementById('btn-victory-restart');
+    const btnReset = document.getElementById('btn-reset');
+
+    function startTimer() {
+      if (state.timerInterval) clearInterval(state.timerInterval);
+      state.timerSeconds = 0;
+      state.timerInterval = setInterval(() => {
+        state.timerSeconds++;
+        const mins = Math.floor(state.timerSeconds / 60).toString().padStart(2, '0');
+        const secs = (state.timerSeconds % 60).toString().padStart(2, '0');
+        statTimerEl.textContent = `${mins}:${secs}`;
+      }, 1000);
+    }
+
+    function initGame() {
+      state.revealed = { 'D5': 'innocent' };
+      state.unlockedFacts = new Set(['FACT_D5']);
+      state.errors = 0;
+      state.activeClues = [CARD_CLUES.D5];
+
+      startTimer();
+      renderBoard();
+      renderClues();
+      updateStats();
+    }
+
+    /*
+     * STREAMING_CHUNK:Rendering board components and user controls...
+     */
+    function renderBoard() {
+      boardEl.innerHTML = '';
+
+      SUSPECTS.forEach(suspect => {
+        const isRevealed = state.revealed[suspect.id] !== undefined;
+        const revealedStatus = state.revealed[suspect.id];
+        const cardClueData = CARD_CLUES[suspect.id];
+
+        const card = document.createElement('div');
+        card.dataset.id = suspect.id;
+
+        let baseClass = "card-shadow rounded-xl p-2 sm:p-2.5 border transition-all duration-300 flex flex-col justify-between select-none relative overflow-hidden min-h-[145px] sm:min-h-[160px]";
+
+        if (isRevealed) {
+          baseClass += " card-reveal";
+          if (revealedStatus === 'innocent') {
+            baseClass += " bg-emerald-950/70 border-emerald-500/80 text-emerald-100 ring-1 ring-emerald-500/40";
+          } else {
+            baseClass += " bg-rose-950/70 border-rose-500/80 text-rose-100 ring-1 ring-rose-500/40";
+          }
+        } else {
+          baseClass += " bg-slate-900 border-slate-800 text-slate-200";
+        }
+
+        card.className = baseClass;
+
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[10px] font-black uppercase px-1.5 py-0.5 rounded ${isRevealed ? (revealedStatus === 'innocent' ? 'bg-emerald-500/30 text-emerald-300 border border-emerald-500/40' : 'bg-rose-500/30 text-rose-300 border border-rose-500/40') : 'bg-slate-800 text-slate-400 border border-slate-700'}">
+                ${suspect.id}
+              </span>
+              ${isRevealed ? `
+                <span class="text-[9px] sm:text-[10px] font-extrabold px-1.5 py-0.5 rounded-full flex items-center gap-1 ${revealedStatus === 'innocent' ? 'bg-emerald-500 text-slate-950' : 'bg-rose-500 text-white'}">
+                  <i class="fas ${revealedStatus === 'innocent' ? 'fa-shield-halved' : 'fa-skull'} text-[8px]"></i>
+                  <span>${revealedStatus === 'innocent' ? 'INNOCENT' : 'CRIMINAL'}</span>
+                </span>
+              ` : ''}
+            </div>
+
+            <h3 class="font-black text-xs sm:text-sm leading-tight ${isRevealed ? 'text-white' : 'text-slate-100'}">
+              ${suspect.name}
+            </h3>
+            <p class="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+              <i class="fas fa-location-dot text-[8px] text-slate-500"></i>
+              <span>${suspect.city}</span>
+            </p>
+          </div>
+
+          ${isRevealed && cardClueData ? `
+            <div class="mt-1.5 pt-1.5 border-t border-slate-700/60 text-[9px] sm:text-[10px] leading-tight font-medium ${revealedStatus === 'innocent' ? 'text-emerald-200/90' : 'text-rose-200/90'} italic bg-black/30 p-1.5 rounded-md">
+              <i class="fas fa-quote-left text-[7px] mr-1 opacity-60"></i>${cardClueData.text}
+            </div>
+          ` : ''}
+
+          ${!isRevealed ? `
+            <div class="mt-2 pt-2 border-t border-slate-800 flex items-center gap-1">
+              <button data-action="innocent" class="btn-role-select flex-1 py-1 px-1 bg-emerald-950/80 hover:bg-emerald-800/90 border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 text-[9px] font-extrabold rounded flex items-center justify-center gap-0.5 transition">
+                <span>😇 INNOCENT</span>
+              </button>
+              <button data-action="criminal" class="btn-role-select flex-1 py-1 px-1 bg-rose-950/80 hover:bg-rose-800/90 border border-rose-500/40 hover:border-rose-400 text-rose-300 text-[9px] font-extrabold rounded flex items-center justify-center gap-0.5 transition">
+                <span>😈 CRIMINAL</span>
+              </button>
+            </div>
+          ` : ''}
+        `;
+
+        if (!isRevealed) {
+          const btnInnocent = card.querySelector('[data-action="innocent"]');
+          const btnCriminal = card.querySelector('[data-action="criminal"]');
+
+          btnInnocent.addEventListener('click', (e) => {
+            e.stopPropagation();
+            attemptSelection(suspect, 'innocent');
+          });
+
+          btnCriminal.addEventListener('click', (e) => {
+            e.stopPropagation();
+            attemptSelection(suspect, 'criminal');
+          });
+        }
+
+        boardEl.appendChild(card);
+      });
+    }
+
+    /*
+     * STREAMING_CHUNK:Interactive click logic and validation...
+     */
+    function attemptSelection(suspect, chosenRole) {
+      if (state.revealed[suspect.id]) return;
+
+      const isDeductibleNow = canReveal(suspect.id);
+
+      // STEP 1: LOGIC CHECK (NO GUESSING ALLOWED)
+      if (!isDeductibleNow) {
+        noGuessTextEl.innerHTML = `❌ <strong>Encara no es pot determinar!</strong> En aquest joc no es pot endevinar per atzar. Hi ha una deducció lògica pendent que pots fer amb les pistes que tens desglossades per determinar un altre personatge primer!`;
+        modalNoGuess.classList.remove('hidden');
+        return;
+      }
+
+      // STEP 2: ROLE SELECTION CHECK
+      const isCorrectRole = (chosenRole === suspect.solution);
+
+      if (isCorrectRole) {
+        state.revealed[suspect.id] = suspect.solution;
+        unlockFactsForSuspect(suspect.id);
+
+        if (CARD_CLUES[suspect.id]) {
+          state.activeClues.push(CARD_CLUES[suspect.id]);
+        }
+
+        renderBoard();
+        renderClues();
+        updateStats();
+
+        // Check Victory
+        if (Object.keys(state.revealed).length === 20) {
+          clearInterval(state.timerInterval);
+          setTimeout(() => {
+            modalVictory.classList.remove('hidden');
+          }, 350);
+        }
+      } else {
+        state.errors++;
+        updateStats();
+
+        wrongRoleTextEl.innerHTML = `⚠️ <strong>Incorrecte!</strong> En/La <strong>${suspect.name} (${suspect.id})</strong> NO és <strong>${chosenRole.toUpperCase()}</strong>.<br><br>Llegeix amb atenció les teves pistes acumulades!`;
+        modalWrongRole.classList.remove('hidden');
+
+        const cardEl = boardEl.querySelector(`[data-id="${suspect.id}"]`);
+        if (cardEl) {
+          cardEl.classList.add('shake-anim');
+          setTimeout(() => {
+            cardEl.classList.remove('shake-anim');
+          }, 500);
+        }
+      }
+    }
+
+    function renderClues() {
+      cluesContainerEl.innerHTML = '';
+      clueCountBadgeEl.textContent = `${state.activeClues.length} Pista${state.activeClues.length > 1 ? 's' : ''}`;
+
+      state.activeClues.slice().reverse().forEach((clue, idx) => {
+        const clueCard = document.createElement('div');
+        clueCard.className = "bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs leading-relaxed text-slate-200 flex flex-col gap-1 shadow-sm";
+
+        clueCard.innerHTML = `
+          <div class="flex items-center justify-between text-[11px] text-blue-400 font-bold">
+            <span class="flex items-center gap-1.5">
+              <i class="fas fa-bullhorn text-[10px] text-blue-400/80"></i>
+              <span>${clue.source}</span>
+            </span>
+            ${idx === 0 ? '<span class="text-[9px] bg-blue-500/30 text-blue-300 border border-blue-500/40 px-1.5 py-0.2 rounded font-black uppercase">Nova</span>' : ''}
+          </div>
+          <p class="text-slate-300 font-medium">${clue.text}</p>
+        `;
+
+        cluesContainerEl.appendChild(clueCard);
+      });
+    }
+
+    function updateStats() {
+      statRevealedEl.textContent = Object.keys(state.revealed).length;
+      statErrorsEl.textContent = state.errors;
+    }
+
+    // Modal listeners
+    btnCloseNoGuess.addEventListener('click', () => modalNoGuess.classList.add('hidden'));
+    btnCloseWrongRole.addEventListener('click', () => modalWrongRole.classList.add('hidden'));
+
+    btnRules.addEventListener('click', () => modalRules.classList.remove('hidden'));
+    btnCloseRules.addEventListener('click', () => modalRules.classList.add('hidden'));
+    btnCloseRules2.addEventListener('click', () => modalRules.classList.add('hidden'));
+
+    btnReset.addEventListener('click', () => {
+      initGame();
+    });
+
+    btnVictoryRestart.addEventListener('click', () => {
+      modalVictory.classList.add('hidden');
+      initGame();
+    });
+
+    window.onload = function() {
+      initGame();
+    };
+  </script>
+</body>
+</html>
