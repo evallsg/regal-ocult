@@ -64,6 +64,11 @@
         display: none;
       }
     }
+    a {
+      font-weight: bold;
+      text-decoration: underline!important;
+      color: rgb(5 150 105 / var(--tw-bg-opacity, 1))!important;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
@@ -216,15 +221,19 @@
   <div id="modal-victory" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border-2 border-emerald-500 rounded-2xl max-w-md w-full p-6 shadow-2xl text-center">
       <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center text-3xl mb-4 mx-auto border border-emerald-500/40">
-        <i class="fas fa-trophy"></i>
+        <i class="fas fa-gift"></i>
       </div>
       <h3 class="text-2xl font-black text-white mb-2">CAS RESOLT!</h3>
       <p class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-6">
         Has identificat perfectament l'estat dels 20 personatges fent servir única i exclusivament la lògica! 
       </p>
       <p class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-6">
-        Això només ha sigut un entrenament pel teu regal. Prepara tots els teus sentits i l'enginy perquè tocarà resoldre casos i misteris: <b>anirem a fer de jurat d'un cas + ESCAPE ROOM!</b> Però primer el més difícil: trobar un dia que puguem fer-ho totes juntes!!!
+        Això només ha sigut un entrenament pel teu regal. Prepara tots els teus sentits i l'enginy perquè tocarà resoldre casos i misteris: <b>Anirem a fer de <a href="https://feverup.com/es/barcelona/the-jury-experience?srsltid=AU7gw4ViJHk8ykJzRdx9UpZXSMZb-f9hnFkQuJoSBFDxzIZWZ3aAt8p8">jurat d'un cas</a> i un <a href="https://escapehunt.com/es/barcelona/ca/games/el-misteri-de-gaudi/">escape room</a>!</b>
       </p>
+      <p class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-6">
+         Però primer el més difícil: trobar un dia que puguem fer-ho totes juntes!!!
+      </p>
+    
         <button id="btn-victory-restart" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black rounded-xl transition shadow-lg">
         TORNAR A JUGAR
       </button>
@@ -241,7 +250,7 @@
      */
     const SUSPECTS = [
       // Fila 1
-      { id: 'A1', name: 'Mireia P', city: 'Arbúcies', row: 1, col: 'A', solution: 'criminal' },
+      { id: 'A1', name: '​👩‍🏫​ Mireia P', city: 'Arbúcies', row: 1, col: 'A', solution: 'criminal' },
       { id: 'B1', name: 'Gina', city: 'Barcelona', row: 1, col: 'B', solution: 'criminal' },
       { id: 'C1', name: 'Mireia Ll', city: 'Teià', row: 1, col: 'C', solution: 'innocent' },
       { id: 'D1', name: 'Safi', city: 'Arenys de Mar', row: 1, col: 'D', solution: 'criminal' },
